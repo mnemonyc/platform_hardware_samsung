@@ -159,9 +159,16 @@ static int set_light_backlight(struct light_device_t *dev,
 {
     int err = 0;
     int brightness = rgb_to_brightness(state);
+    int key_backlight = 0;
 
     pthread_mutex_lock(&g_lock);
     err = write_int(PANEL_FILE, brightness);
+    if (brightness != 0) {
+        key_backlight = 1;
+    }else{
+        key_backlight = 0;
+    }
+    write_int(BUTTON_FILE, key_backlight);
     pthread_mutex_unlock(&g_lock);
 
     return err;

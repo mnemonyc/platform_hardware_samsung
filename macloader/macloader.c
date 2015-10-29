@@ -27,7 +27,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <pwd.h>
-#include <errno.h>
 
 #include <cutils/log.h>
 

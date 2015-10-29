@@ -29,8 +29,6 @@
 
 //#define LOG_NDEBUG 0
 
-#include <sys/mman.h>
-
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -49,12 +47,8 @@
 #include "gralloc_priv.h"
 #include "gralloc_helper.h"
 
+#include "linux/fb.h"
 #include "s3c_lcd.h"
-
-#include "gralloc_priv.h"
-#include "gr.h"
-#include <cutils/properties.h>
-#include <profiler.h>
 
 #ifdef USE_WFD
 #include "WfdVideoFbInput.h"
@@ -68,10 +62,6 @@
 
 enum {
     PAGE_FLIP = 0x00000001,
-};
-
-struct fb_context_t {
-    framebuffer_device_t  device;
 };
 
 #ifdef USE_WFD
@@ -461,7 +451,7 @@ int framebuffer_device_open(hw_module_t const* module, const char* name, hw_devi
     }
 
     /* initialize our state here */
-    fb_context_t *dev = (fb_context_t*)malloc(sizeof(*dev));
+    framebuffer_device_t *dev = new framebuffer_device_t();
     memset(dev, 0, sizeof(*dev));
 
     /* initialize the procs */

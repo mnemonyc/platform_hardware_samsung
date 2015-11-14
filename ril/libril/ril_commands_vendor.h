@@ -30,7 +30,7 @@
     {RIL_REQUEST_USIM_PB_CAPA, dispatchVoid, responseVoid},
     {RIL_REQUEST_LOCK_INFO, dispatchVoid, responseVoid},
     {10015, NULL, NULL},
-    {RIL_REQUEST_DIAL_EMERGENCY, dispatchDial, responseVoid},
+    // {RIL_REQUEST_DIAL_EMERGENCY, dispatchDial, responseVoid},
     {RIL_REQUEST_GET_STOREAD_MSG_COUNT, dispatchVoid, responseVoid},
     {RIL_REQUEST_STK_SIM_INIT_EVENT, dispatchVoid, responseVoid},
     {RIL_REQUEST_GET_LINE_ID, dispatchVoid, responseVoid},

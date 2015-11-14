@@ -68,7 +68,6 @@ namespace android {
 #define ANDROID_WAKE_LOCK_USECS 200000
 
 #define PROPERTY_RIL_IMPL "gsm.version.ril-impl"
-#define PROPERTY_QAN_ELEMENTS "ro.ril.qanelements"
 
 // match with constant in RIL.java
 #define MAX_COMMAND_BYTES (8 * 1024)
@@ -2299,24 +2298,11 @@ static int responseStrings(Parcel &p, void *response, size_t responselen, bool n
         char **p_cur = (char **) response;
 
         numStrings = responselen / sizeof(char *);
-        if (network_search) {
-            int32_t QANElements;
-
-            /*
-             * This needs to be set to same value as mQANElements in the RIL
-             * Telephony class.
-             */
-            QANElements = property_get_int32(PROPERTY_QAN_ELEMENTS, 4);
-            p.writeInt32 ((numStrings / 5) * QANElements);
-        } else {
-            p.writeInt32 (numStrings);
-        }
+        p.writeInt32 (numStrings);
 
         /* each string*/
         startResponse;
         for (int i = 0 ; i < numStrings ; i++) {
-            if (network_search && ((i + 1) % 5 == 0))
-                continue;
             appendPrintBuf("%s%s,", printBuf, (char*)p_cur[i]);
             writeStringToParcel (p, p_cur[i]);
         }

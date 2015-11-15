@@ -304,6 +304,9 @@ static int responseHardwareConfig(Parcel &p, void *response, size_t responselen)
 static int responseDcRtInfo(Parcel &p, void *response, size_t responselen);
 static int responseRadioCapability(Parcel &p, void *response, size_t responselen);
 static int responseSSData(Parcel &p, void *response, size_t responselen);
+static int responseLceStatus(Parcel &p, void *response, size_t responselen);
+static int responseLceData(Parcel &p, void *response, size_t responselen);
+static int responseActivityData(Parcel &p, void *response, size_t responselen);
 
 static int decodeVoiceRadioTechnology (RIL_RadioState radioState);
 static int decodeCdmaSubscriptionSource (RIL_RadioState radioState);
@@ -3739,6 +3742,90 @@ static int responseDcRtInfo(Parcel &p, void *response, size_t responselen)
     closeResponse;
 
     return 0;
+}
+
+static int responseLceStatus(Parcel &p, void *response, size_t responselen) {
+  if (response == NULL || responselen != sizeof(RIL_LceStatusInfo)) {
+    if (response == NULL) {
+      RLOGE("invalid response: NULL");
+    }
+    else {
+      RLOGE("responseLceStatus: invalid response length %d expecting len: d%",
+            sizeof(RIL_LceStatusInfo), responselen);
+    }
+    return RIL_ERRNO_INVALID_RESPONSE;
+  }
+
+  RIL_LceStatusInfo *p_cur = (RIL_LceStatusInfo *)response;
+  p.write((void *)p_cur, 1);  // p_cur->lce_status takes one byte.
+  p.writeInt32(p_cur->actual_interval_ms);
+
+  startResponse;
+  appendPrintBuf("LCE Status: %d, actual_interval_ms: %d",
+                 p_cur->lce_status, p_cur->actual_interval_ms);
+  closeResponse;
+
+  return 0;
+}
+
+static int responseLceData(Parcel &p, void *response, size_t responselen) {
+  if (response == NULL || responselen != sizeof(RIL_LceDataInfo)) {
+    if (response == NULL) {
+      RLOGE("invalid response: NULL");
+    }
+    else {
+      RLOGE("responseLceData: invalid response length %d expecting len: d%",
+            sizeof(RIL_LceDataInfo), responselen);
+    }
+    return RIL_ERRNO_INVALID_RESPONSE;
+  }
+
+  RIL_LceDataInfo *p_cur = (RIL_LceDataInfo *)response;
+  p.writeInt32(p_cur->last_hop_capacity_kbps);
+
+  /* p_cur->confidence_level and p_cur->lce_suspended take 1 byte each.*/
+  p.write((void *)&(p_cur->confidence_level), 1);
+  p.write((void *)&(p_cur->lce_suspended), 1);
+
+  startResponse;
+  appendPrintBuf("LCE info received: capacity %d confidence level %d
+                  and suspended %d",
+                  p_cur->last_hop_capacity_kbps, p_cur->confidence_level,
+                  p_cur->lce_suspended);
+  closeResponse;
+
+  return 0;
+}
+
+static int responseActivityData(Parcel &p, void *response, size_t responselen) {
+  if (response == NULL || responselen != sizeof(RIL_ActivityStatsInfo)) {
+    if (response == NULL) {
+      RLOGE("invalid response: NULL");
+    }
+    else {
+      RLOGE("responseActivityData: invalid response length %d expecting len: d%",
+            sizeof(RIL_ActivityStatsInfo), responselen);
+    }
+    return RIL_ERRNO_INVALID_RESPONSE;
+  }
+
+  RIL_ActivityStatsInfo *p_cur = (RIL_ActivityStatsInfo *)response;
+  p.writeInt32(p_cur->sleep_mode_time_ms);
+  p.writeInt32(p_cur->idle_mode_time_ms);
+  for(int i = 0; i < RIL_NUM_TX_POWER_LEVELS; i++) {
+    p.writeInt32(p_cur->tx_mode_time_ms[i]);
+  }
+  p.writeInt32(p_cur->rx_mode_time_ms);
+
+  startResponse;
+  appendPrintBuf("Modem activity info received: sleep_mode_time_ms %d idle_mode_time_ms %d
+                  tx_mode_time_ms %d %d %d %d %d and rx_mode_time_ms %d",
+                  p_cur->sleep_mode_time_ms, p_cur->idle_mode_time_ms, p_cur->tx_mode_time_ms[0],
+                  p_cur->tx_mode_time_ms[1], p_cur->tx_mode_time_ms[2], p_cur->tx_mode_time_ms[3],
+                  p_cur->tx_mode_time_ms[4], p_cur->rx_mode_time_ms);
+   closeResponse;
+
+  return 0;
 }
 
 /**
